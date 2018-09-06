@@ -27,40 +27,29 @@
 			};
 			v2f vert(a2v v) {
 				v2f o;
-				//Transform the vertex from object space to projection space
 				o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
-				//Transform the normal fram object space to world space
-				//o.worldNormal = mul(v.normal, (float3x3)_World2Object);
-				//Use the build-in function to compute the normal in world space
+
+				//o.worldNormal = mul(v.normal, (fixed3x3)_World2Object);
 				o.worldNormal = UnityObjectToWorldNormal(v.normal);
-				//Transform the vertex from object space to world space
-				o.worldPos = mul(_Object2World, v.vertex).xyz;
+
+				o.worldPos = mul(_Object2World,v.vertex).xyz;
 				return o;
 			}
 			fixed4 frag(v2f i) :SV_Target{
-				//Get ambient term
+				
 				fixed3 ambient = UNITY_LIGHTMODEL_AMBIENT.xyz;
-
 				fixed3 worldNormal = normalize(i.worldNormal);
+
 				//fixed3 worldLightDir = normalize(_WorldSpaceLightPos0.xyz);
-				//Use the build-in function to compute the light direction in world space
-				//Remember to normalize the result
 				fixed3 worldLightDir = normalize(UnityWorldSpaceLightDir(i.worldPos));
 
-				//Compute diffuse term
-				fixed diffuse = _LightColor0.rgb * _Diffuse.rgb * saturate(dot(worldNormal, worldLightDir));
-				//Get the reflect direction in world space
-				fixed3 reflectDir = normalize(reflect(-worldLightDir, worldNormal));
+				fixed3 diffuse = _LightColor0.rgb * _Diffuse.rgb * saturate(dot(worldNormal, worldLightDir));
 
-				//Get the view direction in world space
-				//fixed3 viewDir = normalize(_WorldSpaceLightPos0.xyz - i.worldPos.xyz);
-				//Use the build-in function to compute the view direction in world space
-				//Remember to normalize the result
+				// fixed3 viewDir = normalize(_WorldSpaceLightPos0.xyz - i.worldPos.xyz);
 				fixed3 viewDir = normalize(UnityWorldSpaceViewDir(i.worldPos));
-				//Get the half direction in world space
+				
 				fixed3 halfDir = normalize(worldLightDir + viewDir);
-				//Compute specular term
-				fixed3 specular = _LightColor0.rgb * _Specular.rgb * pow(max(0, dot(worldNormal, halfDir)), _Gloss);
+				fixed3 specular = _LightColor0.rgb * _Specular.rgb * pow(max(0,dot(worldNormal,halfDir)),_Gloss);
 				return fixed4(ambient + diffuse + specular, 1.0);
 			}
 			ENDCG
